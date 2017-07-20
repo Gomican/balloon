@@ -14,8 +14,16 @@ LOWER_COLOR  = 110
 X_START = 175
 Y_START = 185
 
-X_END = 380
+X_END = 375
 Y_END = 370
+
+
+#サンプル画像の使用範囲
+X_S = 150
+Y_S = 150
+
+X_E = 400
+Y_E = 400
 
 ################ 画像のサイズを取得する関数(カラー,グレー対応) ################
 ## 引数 　　- img 画像ファイル
@@ -134,6 +142,7 @@ if __name__ == '__main__':
 
     ## 親画像の切り取り ##
     origin = origin_edge[Y_START:Y_END, X_START:X_END]
+    sample = sample_edge[Y_S:Y_E, X_S:X_E]
 
     ## 評価範囲の設定 ##
     origin_height,origin_width,channels = Get_ImgSize(origin)
@@ -144,17 +153,20 @@ if __name__ == '__main__':
 
 
     ## 親画像を元にして一番距離の近い特徴点を求める ##
+    point = [0]*2
     least = 0
-    for h in range(0,sample_height):
-        for w in range(0,sample_width):
+    h = 0
+    w = 0
+    while h < sample_height:
+        while w < sample_width:
             length = [0]*len(origin_keypoints)
             for i in range(0,len(origin_keypoints)):
                 origin_keypoint = origin_keypoints[i]
                 for j in range(0,len(sample_keypoints)):
                     sample_keypoint = sample_keypoints[j]
                     # 距離を求める
-                    a = np.array([origin_keypoint.pt[0]+h,origin_keypoint.pt[1]+w])
-                    b = np.array([sample_keypoint.pt[0],sample_keypoint.pt[1]])
+                    a = np.array([origin_keypoint.pt[0],origin_keypoint.pt[1]])
+                    b = np.array([h,w])
                     u = b-a
                     l = np.linalg.norm(u)
                     if ((j == 0) or (l < length[i])):
@@ -163,12 +175,15 @@ if __name__ == '__main__':
                         length[i] = length[i]
             ave = np.average(length)
             if ((least > ave) or ((h==0) and (w==0))):
+                point[0] = X_S - w -15
+                point[1] = Y_S - h -15
                 least = ave
-            w = w + 10
-        h = h + 10
+            w = w +30
+        h = h + 30
+    cv2.circle(sample,(point[0],point[1]),50,(0,0,255),10)
 
     # 表示
-    cv2.imshow("ORIGIN", origin)
+    cv2.imshow("SAMPLE", sample)
     #cv2.imshow("SAMPLE", sample)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
