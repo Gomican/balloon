@@ -124,6 +124,8 @@ if __name__ == '__main__':
     # 画像の読み込み
     origin = cv2.imread("origin.jpg", 0)
     sample = cv2.imread("output_disp2.png",0)
+    tmp_origin = origin
+    tmp_sample = sample
 
     ## 親画像の任意の色抽出 ##
     origin = Get_AnyColor(origin)
@@ -175,14 +177,31 @@ if __name__ == '__main__':
                         length[i] = length[i]
             ave = np.average(length)
             if ((least > ave) or ((h==0) and (w==0))):
-                point[0] = X_S - w -15
-                point[1] = Y_S - h -15
+                point[0] = w
+                point[1] = h
                 least = ave
-            w = w +30
+            w = w + 30
         h = h + 30
-    cv2.circle(sample,(point[0],point[1]),50,(0,0,255),10)
+
+    ########### 親画像をサンプル画像から引く ###########
+    ## 親画像の精度誤差を打ち消すために膨張処理を施す ##
+    kernel = np.ones((5,5),np.uint8)
+    dilation_origin = cv2.dilate(tmp_origin,kernel,iterations = 1)
+    dilation_origin = cv2.dilate(dilation_origin,kernel,iterations = 1)
+
+    for i in range(point[0],X_END):
+        for j in range(point[1],Y_END):
+            if (dilation_origin[i][j] != 0):
+                tmp_sample[i][j] = 0
+
+
+    cv2.circle(sample,(point[0]+100,point[1]+93),10,(255,0,0),-1)
+    ########## サンプル画像をトリミング ##########
+    #sample= tmp_sample[X_END:point[1], Y_END:point[0]]
+
 
     # 表示
+    cv2.imshow("ORIGIN", tmp_origin)
     cv2.imshow("SAMPLE", sample)
     #cv2.imshow("SAMPLE", sample)
     cv2.waitKey(0)
