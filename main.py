@@ -75,7 +75,6 @@ neiborhood8 = np.array([[1, 1, 1],
                         [1, 1, 1]],
                         np.uint8)
 
-
 def Remove_Noise(img, neiborhood):
     ##オープニング
     img_dst = cv2.morphologyEx(img, cv2.MORPH_OPEN, neiborhood)
@@ -86,14 +85,28 @@ def Remove_Noise(img, neiborhood):
 ## ___endOfFunction___ ##
 
 
+################特徴点抽出する関数################
+## 引数   - img       :画像データ
+## 戻り値 - keypoints :特徴量
+# pt	ポイント（x, y）
+# size	特徴点の直径
+# angle	[0, 360) の範囲の角度。y軸が下方向で右回り。計算不能な場合は-1。
+# response	特徴点の強度
+# octave	特徴点を検出したピラミッドレイヤー
+# class_id	特徴点が属するクラスのID
 
+def Get_Keypoints(img):
+    detector = cv2.ORB_create()
+    keypoints = detector.detect(img)
+    return keypoints
+## ___endOfFunction___ ##
 if __name__ == '__main__':
 
     # 画像の読み込み
     gray = cv2.imread("origin.jpg", 0)
     sample = cv2.imread("output_disp2.png",0)
 
-    gray = Get_AnyColor(gray)
+    gray_keypoints = Get_Keypoints(gray)
 
     # 表示
     cv2.imshow("ORIGIN", gray)
