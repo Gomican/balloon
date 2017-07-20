@@ -94,22 +94,42 @@ def Remove_Noise(img, neiborhood):
 # response	特徴点の強度
 # octave	特徴点を検出したピラミッドレイヤー
 # class_id	特徴点が属するクラスのID
-
 def Get_Keypoints(img):
     detector = cv2.ORB_create()
     keypoints = detector.detect(img)
     return keypoints
 ## ___endOfFunction___ ##
+
+
+
 if __name__ == '__main__':
 
     # 画像の読み込み
-    gray = cv2.imread("origin.jpg", 0)
+    origin = cv2.imread("origin.jpg", 0)
     sample = cv2.imread("output_disp2.png",0)
 
-    gray_keypoints = Get_Keypoints(gray)
+    ## 親画像の任意の色抽出 ##
+    origin = Get_AnyColor(origin)
+
+    ## 比較画像と親画像のノイズ除去 ##
+    origin_clean   = Remove_Noise(origin, neiborhood8)
+    sample_clean   = Remove_Noise(sample, neiborhood8)
+
+    ## 比較画像と親画像の輪郭抽出 ##
+    origin_edge = Get_OutLine(origin_clean)
+    sample_edge = Get_OutLine(sample_clean)
+
+    ## 比較画像と親画像の特徴量抽出 ##
+    origin_keypoints = Get_Keypoints(origin_edge)
+    sample_keypoints = Get_Keypoints(sample_edge)
 
     # 表示
-    cv2.imshow("ORIGIN", gray)
+
+    origin = cv2.drawKeypoints(origin, origin_keypoints, None)
+    sample = cv2.drawKeypoints(sample, sample_keypoints, None)
+
+    cv2.imshow("ORIGIN", origin)
     cv2.imshow("SAMPLE", sample)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+## __endOfMain__ ##
