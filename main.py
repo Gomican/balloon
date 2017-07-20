@@ -123,11 +123,25 @@ if __name__ == '__main__':
     origin_keypoints = Get_Keypoints(origin_edge)
     sample_keypoints = Get_Keypoints(sample_edge)
 
+    ## 親画像を元にして一番距離の近い特徴点を求める ##
+    length = [0]*len(origin_keypoints)
+    for i in range(0,len(origin_keypoints)):
+        origin_keypoint = origin_keypoints[i]
+        for j in range(0,len(sample_keypoints)):
+            sample_keypoint = sample_keypoints[j]
+            # 距離を求める
+            a = np.array([origin_keypoint.pt[0],origin_keypoint.pt[1]])
+            b = np.array([sample_keypoint.pt[0],sample_keypoint.pt[1]])
+            u = b-a
+            l = np.linalg.norm(u)
+            if ((j == 0) or (l < length[i])):
+                length[i] = l
+            else:
+                length[i] = length[i]
+    print("keypoints:",len(origin_keypoints))
+    for i in range(0,len(origin_keypoints)):
+        print(i+1,length[i])
     # 表示
-
-    origin = cv2.drawKeypoints(origin, origin_keypoints, None)
-    sample = cv2.drawKeypoints(sample, sample_keypoints, None)
-
     cv2.imshow("ORIGIN", origin)
     cv2.imshow("SAMPLE", sample)
     cv2.waitKey(0)
