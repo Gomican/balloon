@@ -10,6 +10,13 @@ HIGHER_COLOR = 195
 LOWER_COLOR  = 110
 
 
+#親画像の切り取り範囲
+X_START = 175
+Y_START = 185
+
+X_END = 380
+Y_END = 370
+
 ################ 画像のサイズを取得する関数(カラー,グレー対応) ################
 ## 引数 　　- img 画像ファイル
 ## 戻り値   - height,width,channels
@@ -125,28 +132,44 @@ if __name__ == '__main__':
     origin_keypoints = Get_Keypoints(origin_edge)
     sample_keypoints = Get_Keypoints(sample_edge)
 
-    ## 親画像を元にして一番距離の近い特徴点を求める ##
-    length = [0]*len(origin_keypoints)
-    for i in range(0,len(origin_keypoints)):
-        origin_keypoint = origin_keypoints[i]
-        for j in range(0,len(sample_keypoints)):
-            sample_keypoint = sample_keypoints[j]
-            # 距離を求める
-            a = np.array([origin_keypoint.pt[0],origin_keypoint.pt[1]])
-            b = np.array([sample_keypoint.pt[0],sample_keypoint.pt[1]])
-            u = b-a
-            l = np.linalg.norm(u)
-            if ((j == 0) or (l < length[i])):
-                length[i] = l
-            else:
-                length[i] = length[i]
+    ## 親画像の切り取り ##
+    origin = origin_edge[Y_START:Y_END, X_START:X_END]
 
-    ## 距離の平均を求める
-    ave = np.average(length)
-    print("平均"+str(ave))
+    ## 評価範囲の設定 ##
+    origin_height,origin_width,channels = Get_ImgSize(origin)
+    sample_height,sample_width,channels = Get_ImgSize(sample)
+
+    sample_height = sample_height - origin_height
+    sample_width  = sample_width  - origin_width
+
+
+    ## 親画像を元にして一番距離の近い特徴点を求める ##
+    least = 0
+    for h in range(0,sample_height):
+        for w in range(0,sample_width):
+            length = [0]*len(origin_keypoints)
+            for i in range(0,len(origin_keypoints)):
+                origin_keypoint = origin_keypoints[i]
+                for j in range(0,len(sample_keypoints)):
+                    sample_keypoint = sample_keypoints[j]
+                    # 距離を求める
+                    a = np.array([origin_keypoint.pt[0]+h,origin_keypoint.pt[1]+w])
+                    b = np.array([sample_keypoint.pt[0],sample_keypoint.pt[1]])
+                    u = b-a
+                    l = np.linalg.norm(u)
+                    if ((j == 0) or (l < length[i])):
+                        length[i] = l
+                    else:
+                        length[i] = length[i]
+            ave = np.average(length)
+            if ((least > ave) or ((h==0) and (w==0))):
+                least = ave
+            w = w + 10
+        h = h + 10
+
     # 表示
     cv2.imshow("ORIGIN", origin)
-    cv2.imshow("SAMPLE", sample)
+    #cv2.imshow("SAMPLE", sample)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 ## __endOfMain__ ##
