@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import cv2
+cv2.__version__
 import numpy as np
+
 
 
 #親画像の閾値
@@ -138,9 +140,10 @@ if __name__ == '__main__':
                 length[i] = l
             else:
                 length[i] = length[i]
-    print("keypoints:",len(origin_keypoints))
-    for i in range(0,len(origin_keypoints)):
-        print(i+1,length[i])
+
+    ## 距離の平均を求める
+    ave = np.average(length)
+    print("平均"+str(ave))
     # 表示
     cv2.imshow("ORIGIN", origin)
     cv2.imshow("SAMPLE", sample)
