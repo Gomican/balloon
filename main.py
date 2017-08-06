@@ -127,6 +127,10 @@ if __name__ == '__main__':
     tmp_origin = origin
     tmp_sample = sample
 
+    ## 画像の切り取り ##
+    origin = origin[Y_START:Y_END, X_START:X_END]
+    sample = sample[Y_S:Y_E, X_S:X_E]
+
     ## 親画像の任意の色抽出 ##
     origin = Get_AnyColor(origin)
 
@@ -142,13 +146,9 @@ if __name__ == '__main__':
     origin_keypoints = Get_Keypoints(origin_edge)
     sample_keypoints = Get_Keypoints(sample_edge)
 
-    ## 親画像の切り取り ##
-    origin = origin_edge[Y_START:Y_END, X_START:X_END]
-    sample = sample_edge[Y_S:Y_E, X_S:X_E]
-
     ## 評価範囲の設定 ##
-    origin_height,origin_width,channels = Get_ImgSize(origin)
-    sample_height,sample_width,channels = Get_ImgSize(sample)
+    origin_height,origin_width,channels = Get_ImgSize(origin_edge)
+    sample_height,sample_width,channels = Get_ImgSize(sample_edge)
 
     sample_height = sample_height - origin_height
     sample_width  = sample_width  - origin_width
@@ -160,6 +160,7 @@ if __name__ == '__main__':
     h = 0
     w = 0
     while h < sample_height:
+        w = 0
         while w < sample_width:
             length = [0]*len(origin_keypoints)
             for i in range(0,len(origin_keypoints)):
@@ -195,15 +196,28 @@ if __name__ == '__main__':
                 tmp_sample[i][j] = 0
 
 
-    cv2.circle(sample,(point[0]+100,point[1]+93),10,(255,0,0),-1)
-    ########## サンプル画像をトリミング ##########
-    #sample= tmp_sample[X_END:point[1], Y_END:point[0]]
+    cv2.circle(sample,(point[0],point[1]),10,(255,0,0),-1)
 
+    sample_keypoints = Get_Keypoints(tmp_sample)
+    #out = cv2.drawKeypoints(tmp_sample, sample_keypoints, None)
+    fout = open("sample_point.txt","w")
+    heder = open("heder.txt","w")
 
-    # 表示
-    cv2.imshow("ORIGIN", tmp_origin)
-    cv2.imshow("SAMPLE", sample)
+    for i in range(0,len(sample_keypoints)):
+        sample_keypoint = sample_keypoints[i]
+
+        fout.writelines(str(int(sample_keypoint.pt[0])) + " ")
+        fout.writelines(str(int(sample_keypoint.pt[1])) + "\n")
+
+    heder.writelines(str(len(sample_keypoints))+" ")
+    heder.writelines(str(point[0]) + " ")
+    heder.writelines(str(point[1]))
+
+    heder.close()
+    fout.close()
+    #cv2.imshow("DIFF", out)
     #cv2.imshow("SAMPLE", sample)
+
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 ## __endOfMain__ ##
