@@ -95,7 +95,7 @@ int main(){
   for(i = 0; i < (640/GRID)*(480/GRID); i++);
 
   for(j = 0; j < 10; j++) GKL[j] = tmp[i-j-1];
-
+  /*重複の部分が未完成*/
   for(i = 0; i < 10; i++){
     for(j = 0; j < (640/GRID)*(480/GRID); j++){
       if(est[j] == GKL[i]){
